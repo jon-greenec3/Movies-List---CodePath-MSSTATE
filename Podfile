@@ -5,4 +5,5 @@ use_frameworks!
 
 target 'MobieViewer' do
     pod 'AFNetworking'
+    pod 'MBProgressHUD'
 end
