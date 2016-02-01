@@ -8,15 +8,26 @@
 
 import UIKit
 import AFNetworking
+import MBProgressHUD
 
 
 class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+    
+    
 
     @IBOutlet weak var tableView: UITableView!
+    
+    
     
     var movies: [NSDictionary]?
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // Initialize a UIRefreshControl
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: "refreshControlAction:", forControlEvents: UIControlEvents.ValueChanged)
+        tableView.insertSubview(refreshControl, atIndex: 0)
+        
         tableView.dataSource = self
         tableView.delegate = self
         
@@ -84,6 +95,63 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         print("row \(indexPath.row)")
         return cell
     }
+    
+    // Makes a network request to get updated data
+    // Updates the tableView with the new data
+    // Hides the RefreshControl
+    func refreshControlAction(refreshControl: UIRefreshControl) {
+        
+        // ... Create the NSURLRequest (myRequest) ...
+        let myRequest = NSURLRequest ()
+        // Configure session so that completion handler is executed on main UI thread
+        let session = NSURLSession(
+            configuration: NSURLSessionConfiguration.defaultSessionConfiguration(),
+            delegate:nil,
+            delegateQueue:NSOperationQueue.mainQueue()
+        )
+        
+        let task : NSURLSessionDataTask = session.dataTaskWithRequest(myRequest,
+            completionHandler: { (data, response, error) in
+                
+                // ... Use the new data to update the data source ...
+                
+                // Reload the tableView now that there is new data
+                self.tableView.reloadData()
+                
+                // Tell the refreshControl to stop spinning
+                refreshControl.endRefreshing()	
+        });
+        task.resume()
+    }
+    // ...
+    
+    func loadDataFromNetwork() {
+        
+        // ... Create the NSURLRequest (myRequest) ...
+        let myRequest = NSURLRequest ()
+        
+        // Configure session so that completion handler is executed on main UI thread
+        let session = NSURLSession(
+            configuration: NSURLSessionConfiguration.defaultSessionConfiguration(),
+            delegate:nil,
+            delegateQueue:NSOperationQueue.mainQueue()
+        )
+        
+        // Display HUD right before the request is made
+        MBProgressHUD.showHUDAddedTo(self.view, animated: true)
+        
+        let task : NSURLSessionDataTask = session.dataTaskWithRequest(myRequest,
+            completionHandler: { (data, response, error) in
+                
+                // Hide HUD once the network request comes back (must be done on main UI thread)
+                MBProgressHUD.hideHUDForView(self.view, animated: true)
+                
+                // ... Remainder of response handling code ...
+                
+        });
+        task.resume()
+    }
+
 
     /*
     // MARK: - Navigation
@@ -94,5 +162,5 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         // Pass the selected object to the new view controller.
     }
     */
-
 }
+
