@@ -11,15 +11,22 @@ import AFNetworking
 import MBProgressHUD
 
 
+
 class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     
 
     @IBOutlet weak var tableView: UITableView!
     
+    @IBOutlet weak var searchBar: UISearchBar!
     
     
     var movies: [NSDictionary]?
+    var refreshControl: UIRefreshControl!
+    var endpoint: String!
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -32,7 +39,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         tableView.delegate = self
         
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
-        let url = NSURL(string: "https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
+        let url = NSURL(string: "https://api.themoviedb.org/3/movie/\(endpoint)?api_key=\(apiKey)")
         let request = NSURLRequest(
             URL: url!,
             cachePolicy: NSURLRequestCachePolicy.ReloadIgnoringLocalCacheData,
@@ -79,9 +86,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         let movie = movies![indexPath.row]
         let title = movie["title"] as! String
         let overview = movie["overview"] as! String
-        cell.titleLabel.text = title
         
-        cell.overviewLabel.text = overview
         let baseUrl = "http://image.tmdb.org/t/p/w500"
         if let posterPath = movie["poster_path"] as? String{
             
